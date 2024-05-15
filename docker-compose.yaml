@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  database:
+    image: mysql:8.0.26
+    container_name: database
+    platform: linux/amd64
+    volumes:
+      - db_data:/var/lib/data
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test
+      MYSQL_USER: test
+      MYSQL_PASSWORD: pass
+    ports:
+      - 33067:3306
+  app:
+    entrypoint: ['nest', 'start', '--debug', '0.0.0.0:9229', '--watch']
+    container_name: api
+    build:
+      context: .
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    restart: unless-stopped
+    depends_on:
+      - database
+    env_file:
+      - .env
+
+volumes:
+  db_data: {}
